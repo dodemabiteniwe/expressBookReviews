@@ -67,7 +67,7 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
                     delete book.reviews[username];
                     book.reviews[username] = review;
                 }
-                return res.status(200).json({message: "The review for the book with ISBN" + (req.params.isbn) + "has been added/updated"});
+                return res.status(200).json({message: "The review for the book with ISBN" + (" ")+(req.params.isbn) +(" ")+ "has been added/updated"});
                 next();
             }
             else{
@@ -78,6 +78,30 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
          return res.status(403).json({message: "User not logged in"})
      }
 });
+
+// Delete a book review
+regd_users.delete("/auth/review/:isbn",(req,res)=>{
+    let isbn=req.params.isbn;
+    let book=books[isbn];
+    if(req.session.authorization) {
+        token = req.session.authorization['accessToken'];
+        jwt.verify(token, "access",(err,user)=>{
+            if(!err){
+                req.user = user;
+                let username = user.username;
+                if(book.reviews[username]){
+                    delete book.reviews[username];
+                }
+                return res.status(200).json({message: "Review for the book with ISBN" + (" ")+(req.params.isbn) +(" ")+ "has been delete"});
+            }
+            else{
+                return res.status(403).json({message: "User not authenticated"})
+            }
+         });
+     } else {
+         return res.status(403).json({message: "User not logged in"})
+     }
+  });
 
 module.exports.authenticated = regd_users;
 module.exports.isValid = isValid;
